@@ -1,0 +1,52 @@
+version: "3.8"
+
+
+# docker exec -it attendify_php php artisan optimize:clear
+# docker exec -it attendify_php php artisan migrate:fresh --seed
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: attendify_nginx
+    ports:
+      - "8888:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - attendify_network
+
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: attendify_php
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql
+    networks:
+      - attendify_network
+
+  mysql:
+    image: mysql:8.0
+    container_name: attendify_mysql
+    ports:
+      - "3316:3306"
+    environment:
+      MYSQL_DATABASE: attendify
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: attendify_password
+      MYSQL_USER: attendify
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - attendify_network
+
+volumes:
+  mysql_data:
+
+networks:
+  attendify_network:
+    driver: bridge
