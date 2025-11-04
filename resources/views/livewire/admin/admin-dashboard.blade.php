@@ -10,12 +10,12 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
                 <input type="date" wire:model.live="startDate"
-                       class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                       class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 p-3 focus:ring-indigo-500">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
                 <input type="date" wire:model.live="endDate"
-                       class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                       class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 p-3 focus:ring-indigo-500">
             </div>
         </div>
     </div>

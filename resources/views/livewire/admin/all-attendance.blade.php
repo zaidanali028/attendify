@@ -10,11 +10,11 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
                 <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search by name or email..."
-                       class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                       class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">User</label>
-                <select wire:model.live="userId" class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <select wire:model.live="userId" class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3">
                     <option value="">All Users</option>
                     @foreach($users as $user)
                         <option value="{{ $user->id }}">{{ $user->name }}</option>
@@ -23,7 +23,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                <select wire:model.live="departmentId" class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <select wire:model.live="departmentId" class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3">
                     <option value="">All Departments</option>
                     @foreach($departments as $dept)
                         <option value="{{ $dept->id }}">{{ $dept->name }}</option>
@@ -33,12 +33,12 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
                 <input type="date" wire:model.live="startDate"
-                       class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                       class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
                 <input type="date" wire:model.live="endDate"
-                       class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                       class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3">
             </div>
         </div>
     </div>
