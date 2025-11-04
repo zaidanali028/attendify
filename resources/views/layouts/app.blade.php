@@ -58,7 +58,7 @@
         </aside>
         <!-- Main Content -->
         <main class="flex-1 overflow-y-auto">
-            <div class="p-8">
+            <div>
                 {{ $slot }}
             </div>
         </main>

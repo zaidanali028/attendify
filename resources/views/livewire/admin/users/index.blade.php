@@ -1,4 +1,4 @@
-<div>
+<div class="p-4 sm:p-6">
     <div class="mb-6">
         <div class="flex justify-between items-center">
             <div>

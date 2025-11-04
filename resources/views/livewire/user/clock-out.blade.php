@@ -1,4 +1,4 @@
-<div>
+<div class="p-4 sm:p-6">
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900">Clock Out</h1>
         <p class="mt-2 text-gray-600">Record your clock-out time for today</p>
