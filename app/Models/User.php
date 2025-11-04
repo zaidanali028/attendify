@@ -72,8 +72,12 @@ class User extends Authenticatable
      */
     public function todayAttendance()
     {
+        $today = \Carbon\Carbon::today()->format('Y-m-d');
         return $this->attendances()
-            ->whereDate('attendance_date', today())
+            ->where(function($query) use ($today) {
+                $query->whereDate('attendance_date', $today)
+                      ->orWhere('attendance_date', $today);
+            })
             ->first();
     }
 }

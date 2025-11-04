@@ -21,8 +21,12 @@ class AttendanceService
         }
 
         // Check if user has already clocked in today
+        $today = Carbon::today()->format('Y-m-d');
         $todayAttendance = Attendance::where('user_id', $user->id)
-            ->whereDate('attendance_date', today())
+            ->where(function($query) use ($today) {
+                $query->whereDate('attendance_date', $today)
+                      ->orWhere('attendance_date', $today);
+            })
             ->first();
 
         if ($todayAttendance) {
@@ -69,8 +73,13 @@ class AttendanceService
      */
     public function clockOut(User $user): Attendance
     {
+        // Try multiple ways to find today's attendance
+        $today = Carbon::today()->format('Y-m-d');
         $todayAttendance = Attendance::where('user_id', $user->id)
-            ->whereDate('attendance_date', today())
+            ->where(function($query) use ($today) {
+                $query->whereDate('attendance_date', $today)
+                      ->orWhere('attendance_date', $today);
+            })
             ->first();
 
         if (!$todayAttendance) {
