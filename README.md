@@ -207,6 +207,215 @@ The system uses three roles with different permissions:
 -   Department performance comparisons
 -   Employee rankings and statistics
 
+## Metrics and Calculations
+
+This section explains how the system calculates various metrics and attendance indicators.
+
+### Late Arrival Detection
+
+**Expected Clock-In Time Definition:**
+
+The expected clock-in time is currently **hardcoded** in the following files:
+
+-   `app/Services/AttendanceService.php`:
+    -   Line 37: `setTime(8, 30, 0)` in `clockIn()` method
+    -   Line 158: `setTime(8, 30, 0)` in `updateAttendance()` method
+-   `app/Models/Attendance.php`:
+    -   Line 55: `setTime(8, 30, 0)` in `checkLateArrival()` method
+
+**To change the expected clock-in time**, modify the hour and minute values in these locations:
+
+```php
+$expectedTime = $now->copy()->setTime(8, 30, 0); // Change 8, 30 to desired time
+```
+
+**Calculation Method:**
+
+-   **Expected Clock-In Time**: 8:30 AM (configurable in code)
+-   **Detection Logic**: An employee is marked as late if their clock-in time is **after** 8:30 AM
+-   **Implementation**: `clock_in_time > 08:30:00` on the same day
+-   **Status Update**: Attendance status is set to `'late'` instead of `'present'` if late
+
+**Example:**
+
+-   Clock-in at 8:25 AM → **Not Late** (status: `present`)
+-   Clock-in at 8:30 AM → **Not Late** (status: `present`)
+-   Clock-in at 8:31 AM → **Late** (status: `late`)
+
+### Total Hours Worked
+
+**Calculation Method:**
+
+-   **Formula**: `total_hours = clock_out_time - clock_in_time` (calculated in hours)
+-   **Precision**: Rounded to 2 decimal places
+-   **Method**: Uses Carbon's `diffInHours()` method with `true` parameter for precise calculation
+-   **Unit**: Hours (e.g., 8.50 hours = 8 hours 30 minutes)
+
+**Example:**
+
+-   Clock-in: 08:00 AM, Clock-out: 05:00 PM → **9.00 hours**
+-   Clock-in: 09:15 AM, Clock-out: 06:30 PM → **9.25 hours**
+-   Clock-in: 08:30 AM, Clock-out: 12:45 PM → **4.25 hours**
+
+**Note**: Total hours are only calculated when both clock-in and clock-out times are recorded.
+
+### Early Departure Detection
+
+**Expected Clock-Out Time Definition:**
+
+The expected clock-out time is currently **hardcoded** in the following files:
+
+-   `app/Services/AttendanceService.php`:
+    -   Line 94: `setTime(17, 0, 0)` in `clockOut()` method
+    -   Line 168: `setTime(17, 0, 0)` in `updateAttendance()` method
+-   `app/Models/Attendance.php`:
+    -   Line 64: `setTime(17, 0, 0)` in `checkEarlyDeparture()` method
+
+**To change the expected clock-out time**, modify the hour and minute values in these locations:
+
+```php
+$expectedTime = $now->copy()->setTime(17, 0, 0); // Change 17, 0 to desired time (24-hour format)
+```
+
+**Calculation Method:**
+
+-   **Expected Clock-Out Time**: 5:00 PM (17:00) - configurable in code
+-   **Condition 1**: Employee clocks out **before** 5:00 PM (17:00)
+-   **Condition 2**: Total hours worked is **less than** 8 hours
+-   **Both conditions must be true** for an early departure flag
+
+**Implementation:**
+
+```php
+$isEarlyDeparture = ($clock_out_time < 17:00) && ($total_hours < 8.00)
+```
+
+**Example:**
+
+-   Clock-out at 4:30 PM with 7.5 hours → **Early Departure** ✓
+-   Clock-out at 4:30 PM with 8.5 hours → **Not Early Departure** (worked > 8 hours)
+-   Clock-out at 5:30 PM with 7.0 hours → **Not Early Departure** (left after 5 PM)
+-   Clock-out at 5:30 PM with 9.0 hours → **Not Early Departure**
+
+### Attendance Percentage
+
+**Calculation Method:**
+
+-   **Working Days Definition**: Monday through Friday (weekends excluded)
+-   **Formula**: `(Days Attended / Total Working Days) × 100`
+-   **Days Attended**: Count of unique days with attendance records in the date range
+-   **Total Working Days**: Count of weekdays (Mon-Fri) in the selected date range
+
+**Example:**
+
+-   Date Range: Nov 1-7, 2024 (7 days = 5 working days: Mon-Fri)
+-   Days Attended: 4
+-   **Attendance Percentage**: (4 / 5) × 100 = **80%**
+
+### Overtime Hours
+
+**Calculation Method:**
+
+-   **Standard Work Day**: 8 hours
+-   **Overtime Definition**: Hours worked **in excess** of 8 hours per day
+-   **Formula per Day**: `overtime = max(0, total_hours - 8)`
+-   **Total Overtime**: Sum of overtime hours across all days in the date range
+
+**Example:**
+
+-   Day 1: 8.5 hours → Overtime: 0.5 hours
+-   Day 2: 7.0 hours → Overtime: 0 hours
+-   Day 3: 9.25 hours → Overtime: 1.25 hours
+-   **Total Overtime**: 0.5 + 0 + 1.25 = **1.75 hours**
+
+### Average Break Time
+
+**Calculation Method:**
+
+-   **For days with > 8 hours worked**: Assumes 1 hour break time
+-   **For days with ≤ 8 hours worked**: Break time = `8 - total_hours`
+    -   This represents the difference between standard work day and actual hours worked
+-   **Average**: Mean of all break times calculated across the date range
+
+**Example:**
+
+-   Day 1: 9 hours worked → Break: 1.0 hour (assumed)
+-   Day 2: 7.5 hours worked → Break: 0.5 hours (8 - 7.5)
+-   Day 3: 8 hours worked → Break: 0 hours (8 - 8)
+-   **Average Break Time**: (1.0 + 0.5 + 0) / 3 = **0.5 hours**
+
+**Note**: Break time calculation assumes a standard 8-hour work day and may not reflect actual break durations taken.
+
+### Department Statistics (Admin Dashboard)
+
+**Metrics Calculated:**
+
+1. **Average Hours Worked**: Mean of total hours across all attendance records in the department
+2. **Average Late Arrivals**: Percentage of attendance records marked as late
+3. **Average Early Departures**: Percentage of attendance records marked as early departure
+4. **Average Attendance Percentage**:
+    - `(Total Attended Days / Total Expected Days) × 100`
+    - Expected Days = (Number of Employees) × (Working Days in Date Range)
+
+### Employee Rankings
+
+**Calculation:**
+
+-   Employees are ranked by **total hours worked** in the selected date range
+-   Rankings are sorted in descending order (highest hours first)
+-   Top 10 employees are displayed on the admin dashboard
+
+### Working Days Calculation
+
+**Method:**
+
+-   **Includes**: Monday through Friday
+-   **Excludes**: Saturday and Sunday
+-   **Implementation**: Iterates through each day in the date range and counts only weekdays using Carbon's `isWeekday()` method
+
+**Example:**
+
+-   Date Range: Nov 1-10, 2024
+-   Total Days: 10
+-   Working Days: 8 (excluding 2 weekends)
+
+### Standard Work Hours
+
+The standard work day duration is currently **hardcoded** in the analytics calculations:
+
+-   **Standard Work Day**: 8 hours
+-   Used for calculating:
+    -   Overtime hours (hours worked > 8 hours)
+    -   Break time estimations
+    -   Early departure detection (when combined with early clock-out)
+
+**Location in Code:**
+
+-   `app/Services/AnalyticsService.php`: Lines 31-33 (overtime calculation)
+-   `app/Services/AttendanceService.php`: Line 99 (early departure check)
+
+**To change the standard work hours**, update the numeric value `8` in these calculations.
+
+## Configuration
+
+Currently, the expected clock-in time, expected clock-out time, and standard work hours are **hardcoded** in the source code. To make these configurable:
+
+1.  Add configuration values to `.env` file:
+
+    ```env
+    EXPECTED_CLOCK_IN_HOUR=8
+    EXPECTED_CLOCK_IN_MINUTE=30
+    EXPECTED_CLOCK_OUT_HOUR=17
+    EXPECTED_CLOCK_OUT_MINUTE=0
+    STANDARD_WORK_HOURS=8
+    ```
+
+2.  Create a config file (`config/attendance.php`) to read these values
+
+3.  Update the service classes to use `config('attendance.expected_clock_in_hour')` instead of hardcoded values
+
+This would allow administrators to adjust these settings without modifying the source code.
+
 ## Development
 
 ### Running Commands
