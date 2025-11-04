@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name', 'Attendify') }}</title>
+    <link rel="icon" type="image/png" href="https://www.ecg.com.gh/images/site/ecg_logo.png">
+    <link rel="shortcut icon" type="image/png" href="https://www.ecg.com.gh/images/site/ecg_logo.png">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
@@ -13,6 +15,14 @@
         <!-- Sidebar -->
         <aside class="w-64 bg-gray-800 text-white">
             <div class="p-4">
+                <div class="flex items-center space-x-3 mb-2">
+                    <img 
+                        src="https://www.ecg.com.gh/images/site/ecg_logo.png" 
+                        alt="ECG Logo" 
+                        class="h-10 w-auto object-contain"
+                        onerror="this.style.display='none';"
+                    >
+                </div>
                 <h1 class="text-2xl font-bold">Attendify</h1>
                 <p class="text-gray-400 text-sm">ECG Ghana</p>
             </div>
