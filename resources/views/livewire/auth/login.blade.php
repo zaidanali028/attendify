@@ -1,16 +1,10 @@
 <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
+    <div class="max-w-md w-full space-y-6">
         <!-- Logo and Header -->
         <div class="text-center">
-            <div class="flex justify-center mb-6">
-                <img 
-                    src="https://www.ecg.com.gh/images/site/ecg_logo.png" 
-                    alt="ECG Ghana Logo" 
-                    class="h-24 w-auto object-contain"
-                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 60\'%3E%3Ctext x=\'10\' y=\'40\' font-family=\'Arial\' font-size=\'24\' fill=\'%2300619E\'%3EECG%3C/text%3E%3C/svg%3E';"
-                >
-            </div>
-            <h2 class="text-3xl font-bold text-gray-900 mb-2">
+            <!-- Logo in rounded container -->
+           
+            <h2 class="text-3xl font-bold text-gray-900 mb-1">
                 Attendify
             </h2>
             <p class="text-sm text-gray-600 font-medium">

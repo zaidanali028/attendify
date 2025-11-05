@@ -2,6 +2,52 @@
 
 An attendance management system for ECG Ghana built with Laravel 12, Livewire 3, and Tailwind CSS, containerized with Docker and Docker Compose.
 
+## Table of Contents
+
+-   [Features](#features)
+    -   [User Features](#user-features)
+    -   [Admin Features](#admin-features)
+    -   [Department Head Features](#department-head-features)
+-   [Technology Stack](#technology-stack)
+-   [Prerequisites](#prerequisites)
+-   [Installation](#installation)
+-   [Accessing the Application](#accessing-the-application)
+-   [Default Credentials](#default-credentials)
+-   [Database Seeding](#database-seeding)
+    -   [Initial Seeders](#initial-seeders)
+    -   [Fake Data Seeder](#fake-data-seeder)
+-   [Docker Services](#docker-services)
+-   [Project Structure](#project-structure)
+-   [Roles and Permissions](#roles-and-permissions)
+    -   [User](#user)
+    -   [Admin](#admin)
+    -   [Department Head](#department-head)
+-   [Key Features](#key-features)
+    -   [Attendance Tracking](#attendance-tracking)
+    -   [Activity Logging](#activity-logging)
+    -   [Analytics](#analytics)
+-   [Metrics and Calculations](#metrics-and-calculations)
+    -   [Late Arrival Detection](#late-arrival-detection)
+    -   [Total Hours Worked](#total-hours-worked)
+    -   [Early Departure Detection](#early-departure-detection)
+    -   [Attendance Percentage](#attendance-percentage)
+    -   [Overtime Hours](#overtime-hours)
+    -   [Average Break Time](#average-break-time)
+    -   [Department Statistics (Admin Dashboard)](#department-statistics-admin-dashboard)
+    -   [Employee Rankings](#employee-rankings)
+    -   [Working Days Calculation](#working-days-calculation)
+    -   [Standard Work Hours](#standard-work-hours)
+-   [Configuration](#configuration)
+-   [Development](#development)
+    -   [Running Commands](#running-commands)
+    -   [Frontend Development](#frontend-development)
+    -   [Database Access](#database-access)
+-   [Troubleshooting](#troubleshooting)
+    -   [Permission Issues](#permission-issues)
+    -   [Clear Cache](#clear-cache)
+-   [License](#license)
+-   [Support](#support)
+
 ## Features
 
 ### User Features
