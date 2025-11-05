@@ -1,27 +1,11 @@
 # Attendify - Attendance Management System
 
+![Admin Dashboard](user-actions/admin/dashboard.png)
+
 An attendance management system for ECG Ghana built with Laravel 12, Livewire 3, and Tailwind CSS, containerized with Docker and Docker Compose.
 
 ## Table of Contents
 
--   [Features](#features)
-    -   [User Features](#user-features)
-    -   [Admin Features](#admin-features)
-    -   [Department Head Features](#department-head-features)
--   [Technology Stack](#technology-stack)
--   [Prerequisites](#prerequisites)
--   [Installation](#installation)
--   [Accessing the Application](#accessing-the-application)
--   [Default Credentials](#default-credentials)
--   [Database Seeding](#database-seeding)
-    -   [Initial Seeders](#initial-seeders)
-    -   [Fake Data Seeder](#fake-data-seeder)
--   [Docker Services](#docker-services)
--   [Project Structure](#project-structure)
--   [Roles and Permissions](#roles-and-permissions)
-    -   [User](#user)
-    -   [Admin](#admin)
-    -   [Department Head](#department-head)
 -   [User Interface Guide](#user-interface-guide)
     -   [Authentication](#authentication)
         -   [User Login](#user-login)
@@ -41,6 +25,24 @@ An attendance management system for ECG Ghana built with Laravel 12, Livewire 3,
     -   [Department Head Interface](#department-head-interface)
         -   [Employee Management](#employee-management)
         -   [Employee CRUD Operations](#employee-crud-operations)
+-   [Features](#features)
+    -   [User Features](#user-features)
+    -   [Admin Features](#admin-features)
+    -   [Department Head Features](#department-head-features)
+-   [Technology Stack](#technology-stack)
+-   [Prerequisites](#prerequisites)
+-   [Installation](#installation)
+-   [Accessing the Application](#accessing-the-application)
+-   [Default Credentials](#default-credentials)
+-   [Database Seeding](#database-seeding)
+    -   [Initial Seeders](#initial-seeders)
+    -   [Fake Data Seeder](#fake-data-seeder)
+-   [Docker Services](#docker-services)
+-   [Project Structure](#project-structure)
+-   [Roles and Permissions](#roles-and-permissions)
+    -   [User](#user)
+    -   [Admin](#admin)
+    -   [Department Head](#department-head)
 -   [Key Features](#key-features)
     -   [Attendance Tracking](#attendance-tracking)
     -   [Activity Logging](#activity-logging)
@@ -66,6 +68,431 @@ An attendance management system for ECG Ghana built with Laravel 12, Livewire 3,
     -   [Clear Cache](#clear-cache)
 -   [License](#license)
 -   [Support](#support)
+
+## User Interface Guide
+
+This section provides detailed documentation of the user interface for each role, based on screenshots from the `user-actions` folder. Each screenshot demonstrates specific capabilities and features available to different user roles.
+
+### Authentication
+
+All users (Admin, Department Head, and Regular Users) access the application through a unified login page. The authentication system uses Laravel Sanctum for secure session management.
+
+#### User Login
+
+![User Login](user-actions/user/auth.png)
+
+**Description**: The login page for regular employees. Features include:
+
+-   **ECG Ghana Logo**: Official branding displayed prominently
+-   **Email/Password Authentication**: Secure login credentials
+-   **Remember Me**: Optional checkbox to maintain session
+-   **Responsive Design**: Modern gradient background with card-based form
+-   **Access**: After login, users are redirected to their personal dashboard
+
+**Capabilities After Login**:
+
+-   Clock in/out for daily attendance
+-   View personal attendance analytics dashboard
+-   View and filter personal attendance records
+-   Track personal metrics (hours worked, late arrivals, etc.)
+
+#### Admin Login
+
+![Admin Login](user-actions/admin/auth.png)
+
+**Description**: The same login interface used by administrators. The login page is role-agnostic - all users see the same authentication screen. After successful authentication, users are automatically redirected based on their role:
+
+-   **Admin** → Admin Dashboard (`/admin/dashboard`)
+-   **Department Head** → Employee Management (`/dept-head/employees`)
+-   **Regular User** → User Dashboard (`/dashboard`)
+
+**Capabilities After Login**:
+
+-   Full system administration access
+-   View and edit all attendance records
+-   Manage users, departments, and roles
+-   View comprehensive analytics and reports
+-   Access activity logs for audit trails
+
+#### Department Head Login
+
+![Department Head Login](user-actions/department-head/auth.png)
+
+**Description**: Same login interface as other roles. Department Heads are automatically redirected to the Employee Management page after login.
+
+**Capabilities After Login**:
+
+-   Manage employees within their assigned department
+-   Add new employees to their department
+-   View employee list and details
+
+### Regular User Interface
+
+Regular users have access to personal attendance tracking and viewing capabilities. They cannot modify attendance records or access other users' data.
+
+#### User Dashboard
+
+![User Dashboard](user-actions/user/dashboard.png)
+
+**Description**: Personal analytics dashboard for regular employees showing their attendance statistics.
+
+**Features**:
+
+-   **Date Range Filter**: Select custom date ranges (default: last 30 days) to analyze attendance patterns
+-   **Today's Attendance Status**: Quick view of current day's clock-in/out status
+-   **Key Metrics Display**:
+    -   **Total Hours Worked**: Sum of all hours across the selected date range
+    -   **Late Arrivals Count**: Number of times the employee clocked in after 8:30 AM
+    -   **Early Departures Count**: Number of times the employee left before 5:00 PM with less than 8 hours worked
+    -   **Attendance Percentage**: Percentage of working days attended
+    -   **Overtime Hours**: Total hours worked beyond the standard 8-hour workday
+    -   **Average Break Time**: Calculated break duration based on work patterns
+
+**What Users Can Do**:
+
+-   View their personal attendance analytics
+-   Adjust date ranges to analyze different time periods
+-   Monitor their attendance patterns and performance
+-   Track their own compliance with work hours and schedules
+
+#### Clock In
+
+![Clock In](user-actions/user/clock-in.png)
+
+**Description**: Simple one-click clock-in interface for employees to mark their arrival.
+
+**Features**:
+
+-   **One-Click Clock-In**: Single button to record arrival time
+-   **Automatic Late Detection**: System automatically flags late arrivals (after 8:30 AM)
+-   **Once Per Day**: Prevents multiple clock-ins on the same day
+-   **Status Display**: Shows current day's attendance status
+-   **Time Recording**: Captures exact timestamp of clock-in
+
+**What Users Can Do**:
+
+-   Clock in once per day
+-   View their current attendance status
+-   See if they're marked as late (if clocking in after 8:30 AM)
+-   Receive confirmation of successful clock-in
+
+**System Behavior**:
+
+-   Creates a new attendance record for the day
+-   Sets `clock_in_time` to current timestamp
+-   Marks attendance as `'late'` if clock-in is after 8:30 AM, otherwise `'present'`
+-   Logs the activity in the activity log system
+
+#### Clock Out
+
+![Clock Out](user-actions/user/clock-out.png)
+
+**Description**: Interface for employees to clock out at the end of their workday.
+
+**Features**:
+
+-   **One-Click Clock-Out**: Single button to record departure time
+-   **Automatic Early Departure Detection**: Flags early departures (before 5:00 PM with < 8 hours)
+-   **Total Hours Calculation**: Automatically calculates hours worked for the day
+-   **Status Validation**: Ensures user has clocked in before allowing clock-out
+-   **Time Recording**: Captures exact timestamp of clock-out
+
+**What Users Can Do**:
+
+-   Clock out once per day (after clocking in)
+-   View calculated total hours worked
+-   See if they're marked as early departure
+-   Receive confirmation of successful clock-out
+
+**System Behavior**:
+
+-   Updates the day's attendance record with `clock_out_time`
+-   Calculates and stores `total_hours` worked
+-   Marks `is_early_departure` if conditions are met (before 5 PM AND < 8 hours)
+-   Logs the activity in the activity log system
+
+#### My Attendance Records
+
+![My Attendance Records](user-actions/user/attendance-records.png)
+
+**Description**: Personal attendance history view with filtering capabilities.
+
+**Features**:
+
+-   **Date Range Filter**: Select start and end dates to view specific periods
+-   **Comprehensive Table**: Displays all attendance records with:
+    -   Date of attendance
+    -   Clock-in time
+    -   Clock-out time
+    -   Total hours worked
+    -   Late arrival indicator
+    -   Early departure indicator
+    -   Attendance status (present/late/absent)
+-   **Sorted Display**: Records sorted by date (newest first)
+-   **Status Indicators**: Visual indicators for late arrivals and early departures
+
+**What Users Can Do**:
+
+-   View their complete attendance history
+-   Filter records by date range (default: last 30 days)
+-   Review their attendance patterns over time
+-   Identify days with late arrivals or early departures
+-   Track their total hours worked per day
+
+**Note**: Users can only view their own attendance records. They cannot modify or delete records.
+
+### Admin Interface
+
+Administrators have full system access, including user management, department management, attendance editing, and comprehensive analytics.
+
+#### Admin Dashboard
+
+![Admin Dashboard](user-actions/admin/dashboard.png)
+
+**Description**: Comprehensive analytics dashboard providing organization-wide insights.
+
+**Features**:
+
+-   **Date Range Filter**: Customizable date range for analytics (default: last 30 days)
+-   **Organization Metrics**:
+    -   **Total Employees**: Count of all users in the system
+    -   **Active Employees**: Count of employees with attendance records in the selected period
+-   **Department Statistics**: Performance metrics for each department:
+    -   Average hours worked per department
+    -   Average late arrival percentage
+    -   Average early departure percentage
+    -   Average attendance percentage
+-   **Employee Rankings**: Top 10 employees by total hours worked in the selected period
+-   **Export Capabilities**: Ability to export reports and analytics data
+
+**What Admins Can Do**:
+
+-   View organization-wide attendance analytics
+-   Compare department performance
+-   Identify top-performing employees
+-   Analyze attendance trends across the organization
+-   Export reports for further analysis
+-   Adjust date ranges to analyze different time periods
+
+#### All Attendances Portal
+
+![All Attendances Portal](user-actions/admin/attendee-portal.png)
+
+**Description**: Centralized view of all employee attendance records across the organization.
+
+**Features**:
+
+-   **Advanced Filtering**:
+    -   Search by employee name or email
+    -   Filter by specific employee
+    -   Filter by department
+    -   Filter by date range
+-   **Comprehensive Table**: Displays:
+    -   Employee name and email
+    -   Department
+    -   Attendance date
+    -   Clock-in time
+    -   Clock-out time
+    -   Total hours worked
+    -   Late arrival status
+    -   Early departure status
+    -   Attendance status
+-   **Pagination**: Handles large datasets efficiently (20 records per page)
+-   **Edit Access**: Direct links to edit any attendance record
+
+**What Admins Can Do**:
+
+-   View all attendance records across all departments
+-   Search and filter attendance data by multiple criteria
+-   Access edit functionality for any attendance record
+-   Monitor organization-wide attendance patterns
+-   Identify attendance issues or anomalies
+-   Export filtered attendance data
+
+#### User Management
+
+![User Management](user-actions/admin/user-mgmt.png)
+
+**Description**: Full CRUD interface for managing all users in the system.
+
+**Features**:
+
+-   **User List**: Table displaying all users with:
+    -   Name and email
+    -   Assigned role (Admin, Department Head, User)
+    -   Department assignment
+    -   Actions (Edit/Delete)
+-   **Create User Modal**: Form to create new users with:
+    -   Name, email, password fields
+    -   Role selection (Admin, Department Head, User)
+    -   Department assignment
+-   **Edit User Modal**: Modify existing user details:
+    -   Update name, email
+    -   Change role assignment
+    -   Reassign department
+    -   Update password (optional)
+-   **Search Functionality**: Search users by name or email
+-   **Role Management**: Assign and change user roles dynamically
+
+**What Admins Can Do**:
+
+-   **Create Users**: Add new Admin, Department Head, or Regular User accounts
+-   **Edit Users**: Modify user details, roles, and department assignments
+-   **Delete Users**: Remove users from the system (with proper cascading)
+-   **Manage Roles**: Assign or change roles for any user
+-   **Department Assignment**: Assign users to departments
+-   **Search Users**: Quickly find specific users in the system
+
+**Security**: Only users with the Admin role can access this interface. All user management actions are logged in the activity log system.
+
+#### Departments Management
+
+![Departments Management](user-actions/admin/deppartments-crud.png)
+
+**Description**: Complete CRUD interface for managing organizational departments.
+
+**Features**:
+
+-   **Department List**: Table showing all departments with:
+    -   Department name
+    -   Description
+    -   Status (Active/Inactive)
+    -   Number of employees
+    -   Actions (Edit/Delete)
+-   **Create Department Modal**: Form to create new departments:
+    -   Name field
+    -   Description field
+    -   Status selection (Active/Inactive)
+-   **Edit Department Modal**: Modify existing department details:
+    -   Update name and description
+    -   Change status (activate/deactivate)
+-   **Status Management**: Toggle departments between active and inactive states
+-   **Employee Count**: Display number of employees in each department
+
+**What Admins Can Do**:
+
+-   **Create Departments**: Add new organizational departments
+-   **Edit Departments**: Modify department names, descriptions, and status
+-   **Delete Departments**: Remove departments (with proper validation)
+-   **Activate/Deactivate**: Toggle department status to control access
+-   **View Employee Count**: See how many employees are assigned to each department
+
+**Business Logic**:
+
+-   Inactive departments cannot have new employees assigned
+-   Existing employees in inactive departments remain assigned
+-   Department deletion requires validation to prevent data loss
+
+#### Activity Logs
+
+![Activity Logs](user-actions/admin/activity-log.png)
+
+**Description**: Comprehensive audit trail of all system activities and modifications.
+
+**Features**:
+
+-   **Advanced Filtering**:
+    -   Search by activity description
+    -   Filter by user who performed the action
+    -   Filter by subject type (Attendance, User, Department, etc.)
+-   **Detailed Log Table**: Displays:
+    -   User who performed the action (name and email)
+    -   Activity description (e.g., "User clocked in", "Attendance updated")
+    -   Subject (related model and ID)
+    -   Properties (detailed change information)
+    -   Date and time of activity
+-   **Expandable Details**: Click to view detailed change information:
+    -   **Old Data**: Previous values before modification
+    -   **New Data**: Updated values after modification
+    -   **Updated By**: Admin who made the change (for admin edits)
+-   **Chronological Order**: Logs sorted by newest first
+-   **Pagination**: Handles large log datasets (20 records per page)
+
+**What Admins Can Do**:
+
+-   **View All Activities**: See every action performed in the system
+-   **Audit Attendance Changes**: Track who modified attendance records and when
+-   **Monitor User Actions**: View all clock-in/out activities
+-   **Track System Modifications**: See changes to users, departments, and other entities
+-   **Investigate Issues**: Use logs to troubleshoot problems or investigate discrepancies
+-   **Filter Logs**: Narrow down logs by user, type, or description
+
+**Logged Activities Include**:
+
+-   All clock-in/out events
+-   Attendance record modifications by admins
+-   User creation and updates
+-   Department creation and updates
+-   Role assignments
+-   Any other system changes
+
+### Department Head Interface
+
+Department Heads have limited administrative access focused on managing employees within their assigned department.
+
+#### Employee Management
+
+![Employee Management](user-actions/department-head/employee-management.png)
+
+**Description**: Main interface for Department Heads to view and manage employees in their department.
+
+**Features**:
+
+-   **Employee List**: Table displaying all employees in the department head's assigned department:
+    -   Employee name and email
+    -   Role (typically Regular Users)
+    -   Date added to department
+    -   Actions (if applicable)
+-   **Add Employee Button**: Quick access to add new employees
+-   **Department Context**: Automatically filtered to show only employees from the department head's department
+-   **Search Functionality**: Search employees by name or email
+
+**What Department Heads Can Do**:
+
+-   View all employees assigned to their department
+-   See employee details and contact information
+-   Access employee management functions
+-   Search for specific employees
+
+**Limitations**:
+
+-   Can only view employees from their own department
+-   Cannot view employees from other departments
+-   Cannot modify user roles or system-wide settings
+-   Cannot access admin functions
+
+#### Employee CRUD Operations
+
+![Employee CRUD Operations](user-actions/department-head/employee-crud.png)
+
+**Description**: Interface for Department Heads to add and manage employees in their department.
+
+**Features**:
+
+-   **Create Employee Modal**: Form to add new employees:
+    -   Name field
+    -   Email field
+    -   Password field
+    -   Role assignment (automatically set to "User" role)
+    -   Department assignment (automatically set to department head's department)
+-   **Employee List**: View all employees in the department
+-   **Validation**: Ensures email uniqueness and proper data entry
+
+**What Department Heads Can Do**:
+
+-   **Add Employees**: Create new user accounts for their department
+-   **Assign to Department**: New employees are automatically assigned to the department head's department
+-   **Set Initial Credentials**: Provide name, email, and password for new employees
+-   **View Department Employees**: See all current employees in their department
+
+**Business Rules**:
+
+-   New employees are automatically assigned the "User" role (cannot create admins or other department heads)
+-   Employees are automatically assigned to the department head's department
+-   Department Heads cannot remove employees from their department (requires admin action)
+-   Department Heads cannot modify employee details after creation (requires admin action)
+
+**Note**: Department Heads can only add employees to their own department. They cannot transfer employees between departments or modify employee roles.
 
 ## Features
 
@@ -321,431 +748,6 @@ The system uses three roles with different permissions:
 -   View own dashboard
 -   Manage employees in their assigned department
 -   Add new employees to their department
-
-## User Interface Guide
-
-This section provides detailed documentation of the user interface for each role, based on screenshots from the `user-actions` folder. Each screenshot demonstrates specific capabilities and features available to different user roles.
-
-### Authentication
-
-All users (Admin, Department Head, and Regular Users) access the application through a unified login page. The authentication system uses Laravel Sanctum for secure session management.
-
-#### User Login
-
-**Screenshot**: `user-actions/user/auth.png`
-
-**Description**: The login page for regular employees. Features include:
-
--   **ECG Ghana Logo**: Official branding displayed prominently
--   **Email/Password Authentication**: Secure login credentials
--   **Remember Me**: Optional checkbox to maintain session
--   **Responsive Design**: Modern gradient background with card-based form
--   **Access**: After login, users are redirected to their personal dashboard
-
-**Capabilities After Login**:
-
--   Clock in/out for daily attendance
--   View personal attendance analytics dashboard
--   View and filter personal attendance records
--   Track personal metrics (hours worked, late arrivals, etc.)
-
-#### Admin Login
-
-**Screenshot**: `user-actions/admin/auth.png`
-
-**Description**: The same login interface used by administrators. The login page is role-agnostic - all users see the same authentication screen. After successful authentication, users are automatically redirected based on their role:
-
--   **Admin** → Admin Dashboard (`/admin/dashboard`)
--   **Department Head** → Employee Management (`/dept-head/employees`)
--   **Regular User** → User Dashboard (`/dashboard`)
-
-**Capabilities After Login**:
-
--   Full system administration access
--   View and edit all attendance records
--   Manage users, departments, and roles
--   View comprehensive analytics and reports
--   Access activity logs for audit trails
-
-#### Department Head Login
-
-**Screenshot**: `user-actions/department-head/auth.png`
-
-**Description**: Same login interface as other roles. Department Heads are automatically redirected to the Employee Management page after login.
-
-**Capabilities After Login**:
-
--   Manage employees within their assigned department
--   Add new employees to their department
--   View employee list and details
-
-### Regular User Interface
-
-Regular users have access to personal attendance tracking and viewing capabilities. They cannot modify attendance records or access other users' data.
-
-#### User Dashboard
-
-**Screenshot**: `user-actions/user/dashboard.png`
-
-**Description**: Personal analytics dashboard for regular employees showing their attendance statistics.
-
-**Features**:
-
--   **Date Range Filter**: Select custom date ranges (default: last 30 days) to analyze attendance patterns
--   **Today's Attendance Status**: Quick view of current day's clock-in/out status
--   **Key Metrics Display**:
-    -   **Total Hours Worked**: Sum of all hours across the selected date range
-    -   **Late Arrivals Count**: Number of times the employee clocked in after 8:30 AM
-    -   **Early Departures Count**: Number of times the employee left before 5:00 PM with less than 8 hours worked
-    -   **Attendance Percentage**: Percentage of working days attended
-    -   **Overtime Hours**: Total hours worked beyond the standard 8-hour workday
-    -   **Average Break Time**: Calculated break duration based on work patterns
-
-**What Users Can Do**:
-
--   View their personal attendance analytics
--   Adjust date ranges to analyze different time periods
--   Monitor their attendance patterns and performance
--   Track their own compliance with work hours and schedules
-
-#### Clock In
-
-**Screenshot**: `user-actions/user/clock-in.png`
-
-**Description**: Simple one-click clock-in interface for employees to mark their arrival.
-
-**Features**:
-
--   **One-Click Clock-In**: Single button to record arrival time
--   **Automatic Late Detection**: System automatically flags late arrivals (after 8:30 AM)
--   **Once Per Day**: Prevents multiple clock-ins on the same day
--   **Status Display**: Shows current day's attendance status
--   **Time Recording**: Captures exact timestamp of clock-in
-
-**What Users Can Do**:
-
--   Clock in once per day
--   View their current attendance status
--   See if they're marked as late (if clocking in after 8:30 AM)
--   Receive confirmation of successful clock-in
-
-**System Behavior**:
-
--   Creates a new attendance record for the day
--   Sets `clock_in_time` to current timestamp
--   Marks attendance as `'late'` if clock-in is after 8:30 AM, otherwise `'present'`
--   Logs the activity in the activity log system
-
-#### Clock Out
-
-**Screenshot**: `user-actions/user/clock-out.png`
-
-**Description**: Interface for employees to clock out at the end of their workday.
-
-**Features**:
-
--   **One-Click Clock-Out**: Single button to record departure time
--   **Automatic Early Departure Detection**: Flags early departures (before 5:00 PM with < 8 hours)
--   **Total Hours Calculation**: Automatically calculates hours worked for the day
--   **Status Validation**: Ensures user has clocked in before allowing clock-out
--   **Time Recording**: Captures exact timestamp of clock-out
-
-**What Users Can Do**:
-
--   Clock out once per day (after clocking in)
--   View calculated total hours worked
--   See if they're marked as early departure
--   Receive confirmation of successful clock-out
-
-**System Behavior**:
-
--   Updates the day's attendance record with `clock_out_time`
--   Calculates and stores `total_hours` worked
--   Marks `is_early_departure` if conditions are met (before 5 PM AND < 8 hours)
--   Logs the activity in the activity log system
-
-#### My Attendance Records
-
-**Screenshot**: `user-actions/user/attendance-records.png`
-
-**Description**: Personal attendance history view with filtering capabilities.
-
-**Features**:
-
--   **Date Range Filter**: Select start and end dates to view specific periods
--   **Comprehensive Table**: Displays all attendance records with:
-    -   Date of attendance
-    -   Clock-in time
-    -   Clock-out time
-    -   Total hours worked
-    -   Late arrival indicator
-    -   Early departure indicator
-    -   Attendance status (present/late/absent)
--   **Sorted Display**: Records sorted by date (newest first)
--   **Status Indicators**: Visual indicators for late arrivals and early departures
-
-**What Users Can Do**:
-
--   View their complete attendance history
--   Filter records by date range (default: last 30 days)
--   Review their attendance patterns over time
--   Identify days with late arrivals or early departures
--   Track their total hours worked per day
-
-**Note**: Users can only view their own attendance records. They cannot modify or delete records.
-
-### Admin Interface
-
-Administrators have full system access, including user management, department management, attendance editing, and comprehensive analytics.
-
-#### Admin Dashboard
-
-**Screenshot**: `user-actions/admin/dashboard.png`
-
-**Description**: Comprehensive analytics dashboard providing organization-wide insights.
-
-**Features**:
-
--   **Date Range Filter**: Customizable date range for analytics (default: last 30 days)
--   **Organization Metrics**:
-    -   **Total Employees**: Count of all users in the system
-    -   **Active Employees**: Count of employees with attendance records in the selected period
--   **Department Statistics**: Performance metrics for each department:
-    -   Average hours worked per department
-    -   Average late arrival percentage
-    -   Average early departure percentage
-    -   Average attendance percentage
--   **Employee Rankings**: Top 10 employees by total hours worked in the selected period
--   **Export Capabilities**: Ability to export reports and analytics data
-
-**What Admins Can Do**:
-
--   View organization-wide attendance analytics
--   Compare department performance
--   Identify top-performing employees
--   Analyze attendance trends across the organization
--   Export reports for further analysis
--   Adjust date ranges to analyze different time periods
-
-#### All Attendances Portal
-
-**Screenshot**: `user-actions/admin/attendee-portal.png`
-
-**Description**: Centralized view of all employee attendance records across the organization.
-
-**Features**:
-
--   **Advanced Filtering**:
-    -   Search by employee name or email
-    -   Filter by specific employee
-    -   Filter by department
-    -   Filter by date range
--   **Comprehensive Table**: Displays:
-    -   Employee name and email
-    -   Department
-    -   Attendance date
-    -   Clock-in time
-    -   Clock-out time
-    -   Total hours worked
-    -   Late arrival status
-    -   Early departure status
-    -   Attendance status
--   **Pagination**: Handles large datasets efficiently (20 records per page)
--   **Edit Access**: Direct links to edit any attendance record
-
-**What Admins Can Do**:
-
--   View all attendance records across all departments
--   Search and filter attendance data by multiple criteria
--   Access edit functionality for any attendance record
--   Monitor organization-wide attendance patterns
--   Identify attendance issues or anomalies
--   Export filtered attendance data
-
-#### User Management
-
-**Screenshot**: `user-actions/admin/user-mgmt.png`
-
-**Description**: Full CRUD interface for managing all users in the system.
-
-**Features**:
-
--   **User List**: Table displaying all users with:
-    -   Name and email
-    -   Assigned role (Admin, Department Head, User)
-    -   Department assignment
-    -   Actions (Edit/Delete)
--   **Create User Modal**: Form to create new users with:
-    -   Name, email, password fields
-    -   Role selection (Admin, Department Head, User)
-    -   Department assignment
--   **Edit User Modal**: Modify existing user details:
-    -   Update name, email
-    -   Change role assignment
-    -   Reassign department
-    -   Update password (optional)
--   **Search Functionality**: Search users by name or email
--   **Role Management**: Assign and change user roles dynamically
-
-**What Admins Can Do**:
-
--   **Create Users**: Add new Admin, Department Head, or Regular User accounts
--   **Edit Users**: Modify user details, roles, and department assignments
--   **Delete Users**: Remove users from the system (with proper cascading)
--   **Manage Roles**: Assign or change roles for any user
--   **Department Assignment**: Assign users to departments
--   **Search Users**: Quickly find specific users in the system
-
-**Security**: Only users with the Admin role can access this interface. All user management actions are logged in the activity log system.
-
-#### Departments Management
-
-**Screenshot**: `user-actions/admin/deppartments-crud.png`
-
-**Description**: Complete CRUD interface for managing organizational departments.
-
-**Features**:
-
--   **Department List**: Table showing all departments with:
-    -   Department name
-    -   Description
-    -   Status (Active/Inactive)
-    -   Number of employees
-    -   Actions (Edit/Delete)
--   **Create Department Modal**: Form to create new departments:
-    -   Name field
-    -   Description field
-    -   Status selection (Active/Inactive)
--   **Edit Department Modal**: Modify existing department details:
-    -   Update name and description
-    -   Change status (activate/deactivate)
--   **Status Management**: Toggle departments between active and inactive states
--   **Employee Count**: Display number of employees in each department
-
-**What Admins Can Do**:
-
--   **Create Departments**: Add new organizational departments
--   **Edit Departments**: Modify department names, descriptions, and status
--   **Delete Departments**: Remove departments (with proper validation)
--   **Activate/Deactivate**: Toggle department status to control access
--   **View Employee Count**: See how many employees are assigned to each department
-
-**Business Logic**:
-
--   Inactive departments cannot have new employees assigned
--   Existing employees in inactive departments remain assigned
--   Department deletion requires validation to prevent data loss
-
-#### Activity Logs
-
-**Screenshot**: `user-actions/admin/activity-log.png`
-
-**Description**: Comprehensive audit trail of all system activities and modifications.
-
-**Features**:
-
--   **Advanced Filtering**:
-    -   Search by activity description
-    -   Filter by user who performed the action
-    -   Filter by subject type (Attendance, User, Department, etc.)
--   **Detailed Log Table**: Displays:
-    -   User who performed the action (name and email)
-    -   Activity description (e.g., "User clocked in", "Attendance updated")
-    -   Subject (related model and ID)
-    -   Properties (detailed change information)
-    -   Date and time of activity
--   **Expandable Details**: Click to view detailed change information:
-    -   **Old Data**: Previous values before modification
-    -   **New Data**: Updated values after modification
-    -   **Updated By**: Admin who made the change (for admin edits)
--   **Chronological Order**: Logs sorted by newest first
--   **Pagination**: Handles large log datasets (20 records per page)
-
-**What Admins Can Do**:
-
--   **View All Activities**: See every action performed in the system
--   **Audit Attendance Changes**: Track who modified attendance records and when
--   **Monitor User Actions**: View all clock-in/out activities
--   **Track System Modifications**: See changes to users, departments, and other entities
--   **Investigate Issues**: Use logs to troubleshoot problems or investigate discrepancies
--   **Filter Logs**: Narrow down logs by user, type, or description
-
-**Logged Activities Include**:
-
--   All clock-in/out events
--   Attendance record modifications by admins
--   User creation and updates
--   Department creation and updates
--   Role assignments
--   Any other system changes
-
-### Department Head Interface
-
-Department Heads have limited administrative access focused on managing employees within their assigned department.
-
-#### Employee Management
-
-**Screenshot**: `user-actions/department-head/employee-management.png`
-
-**Description**: Main interface for Department Heads to view and manage employees in their department.
-
-**Features**:
-
--   **Employee List**: Table displaying all employees in the department head's assigned department:
-    -   Employee name and email
-    -   Role (typically Regular Users)
-    -   Date added to department
-    -   Actions (if applicable)
--   **Add Employee Button**: Quick access to add new employees
--   **Department Context**: Automatically filtered to show only employees from the department head's department
--   **Search Functionality**: Search employees by name or email
-
-**What Department Heads Can Do**:
-
--   View all employees assigned to their department
--   See employee details and contact information
--   Access employee management functions
--   Search for specific employees
-
-**Limitations**:
-
--   Can only view employees from their own department
--   Cannot view employees from other departments
--   Cannot modify user roles or system-wide settings
--   Cannot access admin functions
-
-#### Employee CRUD Operations
-
-**Screenshot**: `user-actions/department-head/employee-crud.png`
-
-**Description**: Interface for Department Heads to add and manage employees in their department.
-
-**Features**:
-
--   **Create Employee Modal**: Form to add new employees:
-    -   Name field
-    -   Email field
-    -   Password field
-    -   Role assignment (automatically set to "User" role)
-    -   Department assignment (automatically set to department head's department)
--   **Employee List**: View all employees in the department
--   **Validation**: Ensures email uniqueness and proper data entry
-
-**What Department Heads Can Do**:
-
--   **Add Employees**: Create new user accounts for their department
--   **Assign to Department**: New employees are automatically assigned to the department head's department
--   **Set Initial Credentials**: Provide name, email, and password for new employees
--   **View Department Employees**: See all current employees in their department
-
-**Business Rules**:
-
--   New employees are automatically assigned the "User" role (cannot create admins or other department heads)
--   Employees are automatically assigned to the department head's department
--   Department Heads cannot remove employees from their department (requires admin action)
--   Department Heads cannot modify employee details after creation (requires admin action)
-
-**Note**: Department Heads can only add employees to their own department. They cannot transfer employees between departments or modify employee roles.
 
 ## Key Features
 
