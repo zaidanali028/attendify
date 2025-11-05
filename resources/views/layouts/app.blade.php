@@ -40,6 +40,9 @@
                     <a href="{{ route('admin.users.index') }}" wire:navigate class="block px-4 py-2 hover:bg-gray-700 {{ request()->routeIs('admin.users.*') ? 'bg-gray-700' : '' }}">
                         User Management
                     </a>
+                    <a href="{{ route('admin.activity-logs') }}" wire:navigate class="block px-4 py-2 hover:bg-gray-700 {{ request()->routeIs('admin.activity-logs') ? 'bg-gray-700' : '' }}">
+                        Activity Logs
+                    </a>
                 @elseif(auth()->user()->hasRole('Department Head'))
                     <a href="{{ route('dept-head.employees.index') }}" wire:navigate class="block px-4 py-2 hover:bg-gray-700 {{ request()->routeIs('dept-head.*') ? 'bg-gray-700' : '' }}">
                         Employee Management

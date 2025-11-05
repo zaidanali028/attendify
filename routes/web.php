@@ -37,6 +37,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/attendances/{id}/edit', \App\Livewire\Admin\EditClock::class)->name('attendances.edit');
         Route::get('/departments', \App\Livewire\Admin\Departments\Index::class)->name('departments.index');
         Route::get('/users', \App\Livewire\Admin\Users\Index::class)->name('users.index');
+        Route::get('/activity-logs', \App\Livewire\Admin\ActivityLogs::class)->name('activity-logs');
     });
 
     // Department Head routes
