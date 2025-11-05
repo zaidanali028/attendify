@@ -68,5 +68,8 @@ class DatabaseSeeder extends Seeder
         $this->command->info('Admin: admin@ecgghana.com / password');
         $this->command->info('Dept Head: depthead@ecgghana.com / password');
         $this->command->info('User: user@ecgghana.com / password');
+
+        // Uncomment the line below to seed fake data (50+ users, 2000+ attendance records)
+        // $this->call(FakeDataSeeder::class);
     }
 }

@@ -128,6 +128,78 @@ After running the seeders, you can login with:
 -   Email: `user@ecgghana.com`
 -   Password: `password`
 
+## Database Seeding
+
+The project includes seeders for setting up the database with initial data and optionally, comprehensive fake data for testing.
+
+### Initial Seeders
+
+The default seeders (`DatabaseSeeder`, `RolePermissionSeeder`, `DepartmentSeeder`) create:
+
+-   **5 Sample Departments**: Human Resources, Finance, IT, Operations, Customer Service
+-   **3 Default Roles**: User, Admin, Department Head
+-   **All Required Permissions**: Clock management, dashboard access, user/department management
+-   **3 Default Users**: One Admin, one Department Head, and one Regular User (see credentials above)
+
+Run the initial seeders:
+
+```bash
+docker exec -it attendify_php php artisan db:seed
+```
+
+### Fake Data Seeder
+
+For testing and demonstration purposes, a comprehensive fake data seeder (`FakeDataSeeder`) is available that generates:
+
+-   **5 Department Heads** (one per department)
+-   **50 Regular Users** (distributed across departments)
+-   **2,000+ Attendance Records** over the last 60 days with realistic patterns:
+    -   **70% On-time arrivals** (7:30 AM - 8:30 AM)
+    -   **20% Slightly late** (8:31 AM - 9:30 AM)
+    -   **10% Very late** (after 9:30 AM)
+    -   **Early departures** (before 5 PM with < 8 hours)
+    -   **Overtime scenarios** (> 8 hours worked)
+    -   **Random absences** (~20% chance per weekday)
+    -   **Weekend skipping** (realistic work patterns)
+
+**Run the fake data seeder:**
+
+```bash
+docker exec -it attendify_php php artisan db:seed --class=FakeDataSeeder
+```
+
+**Note**: The fake data seeder requires that departments and roles/permissions already exist (run initial seeders first).
+
+**Sample Credentials After Fake Data Seeding:**
+
+-   Department Head 1: `depthead1@ecgghana.com` / `password`
+-   Department Head 2: `depthead2@ecgghana.com` / `password`
+-   User 1: `user1@ecgghana.com` / `password`
+-   User 2: `user2@ecgghana.com` / `password`
+-   ... and so on (up to user50@ecgghana.com)
+
+**To run everything together:**
+
+```bash
+# Step 1: Run initial seeders
+docker exec -it attendify_php php artisan db:seed
+
+# Step 2: Run fake data seeder
+docker exec -it attendify_php php artisan db:seed --class=FakeDataSeeder
+```
+
+**Or**, edit `database/seeders/DatabaseSeeder.php` and uncomment the line:
+
+```php
+$this->call(FakeDataSeeder::class);
+```
+
+Then run:
+
+```bash
+docker exec -it attendify_php php artisan db:seed
+```
+
 ## Docker Services
 
 -   **Nginx**: Web server (Port 8888)
