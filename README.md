@@ -539,6 +539,243 @@ Department Heads have limited administrative access focused on managing employee
 -   **Containerization**: Docker & Docker Compose
 -   **Build Tool**: Vite
 
+## Architectural Overview
+
+The Attendify system follows a layered architecture pattern with clear separation of concerns. The system is designed to be scalable, maintainable, and secure, with comprehensive documentation through various architectural diagrams. This section provides an overview of the system's architecture, data flow, and design patterns.
+
+### System Architecture
+
+![System Architecture Diagram](dgms/diagrams/04-system-architecture-diagram.png)
+
+The system architecture is organized into distinct layers, each with specific responsibilities:
+
+-   **Client Layer**: Web browsers render the user interface using responsive Tailwind CSS components
+-   **Web Server Layer**: Nginx acts as a reverse proxy, handling HTTP requests and routing to PHP-FPM
+-   **Application Layer**: Laravel 12 framework manages routing, middleware, and MVC architecture, with Livewire 3 providing dynamic UI components
+-   **Business Logic Layer**: Service classes (`AttendanceService`, `AnalyticsService`) encapsulate core business rules and calculations
+-   **Data Access Layer**: Eloquent ORM provides database abstraction through model classes
+-   **Data Layer**: MySQL 8.0 stores all application data with transaction support for data integrity
+
+For detailed component interactions and layer descriptions, see the [System Architecture Diagram documentation](diagrams/04-system-architecture-diagram.md).
+
+### Component Architecture
+
+![Component Diagram](dgms/diagrams/09-component-diagram.png)
+
+The component diagram illustrates the system's modular design and dependencies:
+
+-   **Presentation Layer**: Livewire components and Blade templates with Tailwind CSS and Alpine.js for frontend interactivity
+-   **Application Layer**: HTTP controllers, middleware for authentication and authorization, and route definitions
+-   **Business Logic Layer**: Service classes that handle attendance operations and analytics calculations
+-   **Domain Layer**: Eloquent models representing core business entities (User, Attendance, Department, ActivityLog)
+-   **Infrastructure Layer**: Database drivers, session management, and caching mechanisms
+-   **External Services**: Spatie Permission for RBAC and Laravel Sanctum for authentication
+
+This layered approach ensures separation of concerns, making the system easier to maintain and test. See the [Component Diagram documentation](diagrams/09-component-diagram.md) for detailed component descriptions and interactions.
+
+### Database Schema
+
+![Entity Relationship Diagram](dgms/diagrams/01-entity-relationship-diagram.md.png)
+
+The database schema follows a relational model with the following key entities:
+
+-   **Users**: Store employee information, credentials, and department assignments
+-   **Departments**: Organizational units with status management (active/inactive)
+-   **Attendances**: Daily attendance records with clock-in/out times, calculated metrics, and status flags
+-   **Activity Logs**: Comprehensive audit trail using polymorphic relationships to track all system activities
+-   **Roles & Permissions**: Many-to-many relationships managed by Spatie Permission package
+
+**Key Relationships**:
+
+-   Users belong to one Department (Many-to-One)
+-   Users have many Attendance records (One-to-Many)
+-   Users generate many Activity Logs (One-to-Many)
+-   Users can have multiple Roles via Spatie Permission (Many-to-Many)
+
+**Constraints**:
+
+-   Unique constraint on `(user_id, attendance_date)` ensures one attendance record per user per day
+-   Foreign key constraints with CASCADE on delete maintain referential integrity
+-   Email uniqueness ensures no duplicate user accounts
+
+For complete schema details, see the [Entity Relationship Diagram documentation](diagrams/01-entity-relationship-diagram.md).
+
+### Data Flow
+
+![Data Flow Diagram - Level 0](dgms/diagrams/02-data-flow-diagram-level-0.png)
+
+The context diagram (Level 0) shows the high-level data flows between external entities and the system:
+
+**External Entities**:
+
+-   **User/Employee**: Regular employees who clock in/out and view attendance
+-   **Administrator**: System administrators with full access
+-   **Department Head**: Department managers managing employees
+
+**Data Stores**:
+
+-   **MySQL Database**: Primary data storage for all entities
+-   **Activity Log**: Audit trail of all system activities
+
+**Data Flows**: The system handles authentication, attendance tracking, user/department management, analytics, and comprehensive activity logging. See the [Data Flow Diagram Level 0 documentation](diagrams/02-data-flow-diagram-level-0.md) for detailed flow descriptions.
+
+![Data Flow Diagram - Level 1](dgms/diagrams/03-data-flow-diagram-level-1)
+
+The Level 1 diagram decomposes the system into six main processes:
+
+1.  **Authentication Process**: Validates credentials and manages sessions
+2.  **Attendance Management**: Handles clock in/out operations with validation and calculations
+3.  **User Management**: CRUD operations for user accounts with role assignments
+4.  **Department Management**: Department lifecycle management with status control
+5.  **Analytics Processing**: Aggregates data and calculates metrics for dashboards
+6.  **Activity Logging**: Records all system activities for audit purposes
+
+Each process interacts with specific data stores and triggers activity logging. For detailed process descriptions, see the [Data Flow Diagram Level 1 documentation](diagrams/03-data-flow-diagram-level-1.md).
+
+### Use Cases
+
+![Use Case Diagram](dgms/diagrams/05-use-case-diagram.png)
+
+The system supports 13 primary use cases across three actor types:
+
+**User/Employee Use Cases**:
+
+-   Login to System
+-   Clock In/Out
+-   View Personal Dashboard
+-   View My Attendance Records
+
+**Administrator Use Cases**:
+
+-   All user capabilities plus:
+-   View/Edit All Attendances
+-   Manage Users and Departments
+-   View Admin Dashboard with organization-wide analytics
+-   View Activity Logs
+
+**Department Head Use Cases**:
+
+-   Login and view personal dashboard
+-   Manage Employees within their department
+-   View Department Employees
+
+Each use case includes detailed preconditions, postconditions, and main flow descriptions. See the [Use Case Diagram documentation](diagrams/05-use-case-diagram.md) for complete use case specifications.
+
+### Deployment Architecture
+
+![Deployment Diagram](dgms/diagrams/11-deployment-diagram.md.png)
+
+The system is containerized using Docker and Docker Compose, providing isolated, scalable deployment:
+
+**Container Architecture**:
+
+-   **Nginx Container** (`attendify_nginx`): Handles HTTP requests on port 8888, proxies to PHP-FPM
+-   **PHP Container** (`attendify_php`): Runs Laravel 12 application with PHP 8.2 FPM
+-   **MySQL Container** (`attendify_mysql`): Database server on port 3316
+
+**Network Configuration**:
+
+-   All containers communicate via `attendify_network` (bridge network)
+-   Port mappings expose services to the host machine
+-   Volume mounts enable code synchronization and data persistence
+
+**Volume Management**:
+
+-   MySQL data persisted in named volume for data durability
+-   Application code shared between host and containers via bind mounts
+
+For detailed deployment steps and configuration, see the [Deployment Diagram documentation](diagrams/11-deployment-diagram.md).
+
+### Class Structure
+
+![Class Diagram](dgms/diagrams/12-class-diagram.png)
+
+The class diagram illustrates the object-oriented design of the system:
+
+**Domain Models**:
+
+-   `User`: Represents system users with relationships to departments, attendances, and activity logs
+-   `Attendance`: Encapsulates attendance records with calculation methods for hours, late arrival, and early departure
+-   `Department`: Manages organizational departments with user and attendance relationships
+-   `ActivityLog`: Provides audit trail functionality with polymorphic relationships
+
+**Service Classes**:
+
+-   `AttendanceService`: Handles clock in/out operations, attendance updates, and metric calculations
+-   `AnalyticsService`: Calculates user-level and organization-level analytics and statistics
+
+**Livewire Components**:
+
+-   `ClockIn`, `ClockOut`: User interfaces for attendance operations
+-   `UserDashboard`, `AdminDashboard`: Analytics display components
+-   `Login`: Authentication interface with role-based redirects
+
+The design follows service layer and repository patterns for separation of concerns. See the [Class Diagram documentation](diagrams/12-class-diagram.md) for complete class descriptions and relationships.
+
+### Business Process Flow
+
+![Activity Diagram](dgms/diagrams/10-activity-diagram-attendance.png)
+
+The activity diagram illustrates the complete attendance management workflow:
+
+**User Flow**:
+
+1.  User logs in and checks role
+2.  Validates department assignment
+3.  Records clock-in time with late arrival detection (8:30 AM threshold)
+4.  Records clock-out time with early departure detection (before 5 PM with < 8 hours)
+5.  Calculates total hours and updates attendance record
+6.  Views dashboard with analytics
+
+**Admin Flow**:
+
+-   Can perform all user actions
+-   Additional capabilities: view all attendances, edit records, manage users/departments, view activity logs
+
+**Department Head Flow**:
+
+-   View and manage employees within assigned department
+-   Add new employees with automatic department assignment
+
+The diagram shows decision points, error conditions, and success paths. See the [Activity Diagram documentation](diagrams/10-activity-diagram-attendance.md) for detailed process descriptions.
+
+### Design Patterns
+
+The system employs several design patterns:
+
+-   **Service Layer Pattern**: Business logic separated into service classes (`AttendanceService`, `AnalyticsService`)
+-   **Repository Pattern**: Eloquent ORM acts as repository abstraction
+-   **Active Record Pattern**: Models contain both data and behavior
+-   **Component Pattern**: Livewire components encapsulate UI and logic
+-   **Dependency Injection**: Services injected into components via Laravel's service container
+-   **Middleware Pattern**: Authentication and authorization handled through middleware chain
+
+### Security Architecture
+
+-   **Authentication**: Laravel Sanctum provides session-based authentication with CSRF protection
+-   **Authorization**: Spatie Permission implements role-based access control (RBAC) with granular permissions
+-   **Password Security**: Bcrypt/Argon2 hashing for password storage
+-   **Activity Logging**: Comprehensive audit trail tracks all system modifications
+-   **Input Validation**: Server-side validation on all user inputs
+-   **SQL Injection Protection**: Eloquent ORM uses parameterized queries
+
+### Scalability Considerations
+
+-   **Horizontal Scaling**: Multiple PHP containers can run behind Nginx load balancer
+-   **Database Scaling**: MySQL can be replaced with managed database service or read replicas
+-   **Caching**: Laravel's cache system can be configured with Redis/Memcached
+-   **Session Storage**: Can be moved to Redis for distributed session management
+-   **Asset Optimization**: Vite builds optimized production assets
+
+### Additional Documentation
+
+For more detailed theoretical context and diagram specifications, refer to the [Diagrams Documentation](diagrams/README.md), which includes:
+
+-   Sequence diagrams for clock-in, clock-out, and login processes
+-   Detailed process descriptions and data flow specifications
+-   Component interaction patterns
+-   Deployment configuration details
+
 ## Prerequisites
 
 -   Docker and Docker Compose installed
